@@ -1,136 +1,64 @@
-﻿// Main Libs
-#include <iostream>
-
-// OpenGL
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-// Logging
+﻿#include "Application/App.h" // Asegúrate de que la ruta sea correcta
+#include "Application/WindowManager.h"
 #include <spdlog/spdlog.h>
+#include <memory>
 
-//int main()
-//{
-//	std::cout << "Test" << std::endl;
-//
-//	return 0;
-//}
+int main() {
+    
+    Trompo::WindowManager w_manager;
 
-// Prototype functions
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+    if (!w_manager.Init()) {
+        spdlog::error("Error initializing window manager");
+        return -1;
+    }
 
-void glfw_init()
-{
-	/*
-		Initializing GLFW
-	*/
-	spdlog::info("Initializing GLFW");
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // Declares major version
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6); // Declares minor version.
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //Declares the profile we will be using
-}
+    const char* mytitle = "hello";
+    auto second_window = w_manager.createWindow(mytitle);
 
-int glad_init(std::vector<GLFWwindow*> windows) {
-	spdlog::info("Initializing GLAD");
-	glfwMakeContextCurrent(windows[0]);
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		spdlog::error("Couldn't load GLAD");
-		return -1;
-	}
+    if (!second_window) {
+        spdlog::error("Error creating second window");
+    }
 
-	return 0;
-}
+    while (!w_manager.get_windows().empty()) {
+        glfwPollEvents();
 
-GLFWwindow* new_window(int width, int height, char* name)
-{
-	spdlog::info("Creating GLFW Window");
-	GLFWwindow* new_window = glfwCreateWindow(width, height, name, NULL, NULL);
-	if (new_window == NULL) {
-		spdlog::error("Failed to create GLFW Window");
-		glfwTerminate();
-		return NULL;
-	}
+        // Vector to kill windows on next loop
+        std::vector<GLFWwindow*> windows_to_close;
+        
+        // main loop iterating through windows
+        for (const auto w_ptr : w_manager.get_windows()) {
 
-	return new_window;
-}
+            if (w_ptr) {
+                GLFWwindow* c_window = w_ptr->get_window();
 
-int main()
-{
-	// Init glfw
-	glfw_init();
+                if (c_window && glfwWindowShouldClose(c_window)) {
+                    windows_to_close.push_back(c_window);
+                }
+            }   
+        }
 
-	// ---------------------------
-	// Window vector
-	// ---------------------------
-	std::vector<GLFWwindow*> windows;
+        for (GLFWwindow* w_handle : windows_to_close) {
+            spdlog::info("Closing window");
 
-	spdlog::info("Creating GLFW Window");
-	char w1_name[] = "Window1";
-	auto window1 = new_window(800, 600, w1_name);
+            w_manager.destroyWindow(w_handle);
+        }
 
-	// ---------------------------
-	// Window 2
-	// ---------------------------
-	char w2_name[] = "Window2";
-	auto window2 = new_window(800, 600, w2_name);
+        for (const auto& w_ptr : w_manager.get_windows()) {
+            if (w_ptr) {
+                GLFWwindow* current_window = w_ptr->get_window();
 
-	windows.push_back(window1);
-	windows.push_back(window2);
+                glfwMakeContextCurrent(current_window);
 
-	glad_init(windows);
+                glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT);
 
-	for (auto w : windows) {
-		int w_width, w_height;
-		glfwGetWindowSize(w, &w_width, &w_height);
+                glfwSwapBuffers(current_window);
+            }
+        }
+    }
+    
+    glfwTerminate();
 
-		glfwMakeContextCurrent(w);
-		// Setting up viewport
-		glViewport(0, 0, w_width, w_height);
-		// Setting up callback for resize
-		glfwSetFramebufferSizeCallback(w, framebuffer_size_callback);
-	}
-
-	// ---------------------------
-	// MAIN LOOP
-	// ---------------------------
-	// While window close event is not triggered for current window, it should not close.
-	while (!windows.empty()) {
-		// Polling all pending events
-		glfwPollEvents();
-
-		for (auto w_iterator = windows.begin(); w_iterator != windows.end();) {
-			GLFWwindow* current_window = *w_iterator;
-
-			if (glfwWindowShouldClose(current_window)) {
-				spdlog::info("Closing window");
-				glfwDestroyWindow(current_window);
-				w_iterator = windows.erase(w_iterator);
-			}
-			else
-			{
-				// Initialize context
-				glfwMakeContextCurrent(current_window);
-
-				// Clear screen
-				glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-				glClear(GL_COLOR_BUFFER_BIT);
-
-				// Swap buffer to last generated
-				glfwSwapBuffers(current_window);
-
-				w_iterator++;
-			}
-		}
-	}
-
-	glfwTerminate();
-
-	return 0;
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-	spdlog::info("Window has been resized to: " + std::to_string(width) + "x" + std::to_string(height));
-	glViewport(0, 0, width, height);
+    // El destructor de 'app' se llamará automáticamente aquí, limpiando todo.
+    return 0;
 }
