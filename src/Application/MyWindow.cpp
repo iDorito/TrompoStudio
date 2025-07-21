@@ -5,10 +5,11 @@ namespace Trompo{
 	MyWindow::MyWindow(const char* a_title, unsigned a_width, unsigned a_height, const unsigned a_id)
 		: m_title(a_title), m_width(a_width), m_height(a_height), m_id(a_id) // Use initializer list to properly initialize member variables
 	{
+		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 		m_window = glfwCreateWindow(m_width, m_height, m_title, NULL, NULL);
 
 		if (!m_window) {
-			spdlog::error("Window couldn't be created! id: ", std::to_string(a_id));
+			spdlog::error("Window couldn't be created! id: {}", a_id);
 		}
 	}
 	

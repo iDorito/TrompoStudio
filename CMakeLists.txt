@@ -36,6 +36,7 @@ add_executable (
 	"src/Application/App.cpp"
 	"src/Application/WindowManager.cpp"
 	"src/Application/MyWindow.cpp"
+	"src/Engine/Engine.cpp"
 	# GLAD
 	"dependencies/glad.c"
 
