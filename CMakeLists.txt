@@ -24,11 +24,40 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF) # Optional
 
-# DEPENDENCIES
+# DIRECTORIES MACROS
 set(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies")
 set(DEPENDENCIES_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include")
 set(DEPENDENCIES_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib")
 set(DIR_IMGUI "${DEPENDENCIES_DIR}/imgui")
+
+
+# INCLUDES
+include(FetchContent)
+
+# FetchContent
+# --- glfw
+FetchContent_Declare(
+  glfw
+  GIT_REPOSITORY https://github.com/glfw/glfw.git
+  GIT_TAG        3.3.8
+)
+
+# --- spdlog
+FetchContent_Declare(
+  spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG        v1.10.0
+)
+
+# --- ImGui
+FetchContent_Declare(
+  imgui
+  GIT_REPOSITORY https://github.com/ocornut/imgui.git
+  GIT_TAG        v1.88
+)
+
+# Fetching
+FetchContent_MakeAvailable(glfw spdlog imgui)
 
 # Agregue un origen al ejecutable de este proyecto.
 add_executable (
