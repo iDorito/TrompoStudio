@@ -25,12 +25,12 @@ namespace Trompo {
 			MyWindow* createWindow(const char* title);
 			MyWindow* createWindow();
 
-
-			// Destroyers
-			bool destroyWindow(GLFWwindow* w_handle);
-
 			// Getters
 			GLFWwindow* get_window_by_id(const unsigned window_id);
 			std::vector<std::shared_ptr<MyWindow>> get_windows();
+
+			// Destroyers
+			bool destroyWin(GLFWwindow* w_handle);
+			bool destroyWinById(const unsigned window_id);
 	};
 };

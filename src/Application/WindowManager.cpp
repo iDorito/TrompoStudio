@@ -14,7 +14,6 @@ namespace Trompo {
 		glfwTerminate();
 	}
 
-
 	bool WindowManager::Init() {
 		if (!glfwInit()) {
 			spdlog::error("Error initializing GLFW");
@@ -51,41 +50,14 @@ namespace Trompo {
 		return new_window.get();
 	}
 
-	MyWindow* WindowManager::createWindow()
-	{
-		return createWindow("Trompo default title", WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT);
-	}
-
 	MyWindow* WindowManager::createWindow(const char* title)
 	{
 		return createWindow(title, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT);
 	}
 
-	bool WindowManager::destroyWindow(GLFWwindow* w_handle)
+	MyWindow* WindowManager::createWindow()
 	{
-		if (!w_handle) {
-			spdlog::warn("Attempted to destroy a null window handle."); // Buen log adicional
-			return false;
-		}
-
-		auto it = std::remove_if(m_windows.begin(), m_windows.end(),
-			[w_handle](const std::shared_ptr<MyWindow>& w_ptr) {
-				// Comprueba si el puntero compartido es válido y si la ventana GLFW coincide
-				return w_ptr && w_ptr->get_window() == w_handle;
-			});
-
-		if (it != m_windows.end()) {
-			// Pasa w_handle (formateado con fmt::ptr) al log
-			spdlog::info("WindowManager: Removing window with handle: {}", fmt::ptr(w_handle));
-			// Al borrar el shared_ptr del vector, si es la última referencia,
-			// se llamará al destructor de MyWindow, que a su vez llamará a glfwDestroyWindow.
-			m_windows.erase(it, m_windows.end());
-			return true;
-		}
-
-		// Pasa w_handle (formateado con fmt::ptr) al log
-		spdlog::warn("WindowManager: Window handle {} not found for destruction.", fmt::ptr(w_handle));
-		return false;
+		return createWindow("Trompo default title", WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT);
 	}
 
 	GLFWwindow* WindowManager::get_window_by_id(const unsigned window_id)
@@ -96,8 +68,51 @@ namespace Trompo {
 			}
 		}
 	}
+
 	std::vector<std::shared_ptr<MyWindow>> WindowManager::get_windows()
 	{
 		return m_windows;
+	}
+
+	bool WindowManager::destroyWin(GLFWwindow* w_handle)
+	{
+		if (!w_handle) {
+			spdlog::warn("Attempted to destroy a null window handle.");
+			return false;
+		}
+
+		auto it = std::remove_if(m_windows.begin(), m_windows.end(),
+			[w_handle](const std::shared_ptr<MyWindow>& w_ptr) {
+				// IF pointer is valid and GLFW window matches w_handle
+				return w_ptr && w_ptr->get_window() == w_handle;
+			});
+
+		if (it != m_windows.end()) {
+			// Formatting with fmt::ptr to log the pointer address
+			spdlog::info("WindowManager: Removing window with handle: {} and id {}", fmt::ptr(w_handle), it->get()->get_id());
+			// If its the last window, glfwDestroyWindow will be called in MyWindow destructor.
+			m_windows.erase(it, m_windows.end());
+			return true;
+		}
+
+		// Passes if no window was found
+		spdlog::warn("WindowManager: Window handle {} not found for destruction.", fmt::ptr(w_handle));
+		return false;
+	}
+
+	bool WindowManager::destroyWinById(const unsigned window_id)
+	{
+		if (window_id == 0) {
+			spdlog::warn("Attempted to destroy a window with ID 0, which is invalid.");
+			return false;
+		}
+		
+		if (auto handler = get_window_by_id(window_id)) {
+			spdlog::info("WindowManager: Destroying window with ID: {}", window_id);
+			return destroyWin(handler);
+		}
+		else {
+			return false;
+		}
 	}
 }

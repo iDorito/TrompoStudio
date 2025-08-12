@@ -1,7 +1,8 @@
 #include "Engine/Engine.h"
+#include <memory>
 
 int main() {
-    Engine engine;
-    engine.Run();
+    auto engine = std::make_shared<Trompo::Engine>();
+    engine->Run();
     return 0;
 }

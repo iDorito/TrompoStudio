@@ -30,7 +30,6 @@ set(DEPENDENCIES_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include")
 set(DEPENDENCIES_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib")
 set(DIR_IMGUI "${DEPENDENCIES_DIR}/imgui")
 
-
 # INCLUDES
 include(FetchContent)
 
@@ -62,10 +61,11 @@ FetchContent_MakeAvailable(glfw spdlog imgui)
 # Agregue un origen al ejecutable de este proyecto.
 add_executable (
 	TrompoStudio "src/main.cpp"
-	"src/Application/App.cpp"
+	
 	"src/Application/WindowManager.cpp"
 	"src/Application/MyWindow.cpp"
 	"src/Engine/Engine.cpp"
+	"src/Engine/EngineUI.cpp"
 	# GLAD
 	"dependencies/glad.c"
 
@@ -78,7 +78,7 @@ add_executable (
     "${DIR_IMGUI}/backends/imgui_impl_glfw.cpp"
     "${DIR_IMGUI}/backends/imgui_impl_opengl3.cpp"
 
- "src/Application/MyWindow.h" "src/Application/MyWindow.cpp")
+   )
 
 # DIRECTORIES
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC DIR_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
